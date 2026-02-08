@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>POS System - Login</title>
+    <meta name="description" content="Complete Point of Sale System with offline support">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+    <script>
+        // Prevent theme flicker - run before page renders
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.294.0/font/lucide.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="login-body">
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="theme-toggle-login" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i id="themeIcon" data-lucide="moon"></i>
+    </button>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-container">
+                    <i data-lucide="store" class="logo-icon"></i>
+                </div>
+                <h1 class="login-title">POS System</h1>
+                <p class="login-subtitle">Sign in to your account</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="mail" class="label-icon"></i>
+                        Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="loginEmail" 
+                        class="form-input" 
+                        placeholder="Enter your email address"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="lock" class="label-icon"></i>
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="loginPassword" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+                
+                <a href="#" id="forgotPasswordLink" class="forgot-link">
+                    <i data-lucide="help-circle" class="link-icon"></i>
+                    Forgot Password?
+                </a>
+                
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="log-in" class="btn-icon"></i>
+                    Sign In
+                </button>
+            </form>
+            
+            <div id="signupSection" class="signup-section">
+                <p class="signup-text">Don't have an account?</p>
+                <button id="showSignupBtn" class="btn-secondary">
+                    <i data-lucide="user-plus" class="btn-icon"></i>
+                    Create Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i data-lucide="user-plus" class="title-icon"></i>
+                    Create Account
+                </h2>
+                <button id="closeSignupModal" class="modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <form id="signupForm" class="modal-form">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="user" class="label-icon"></i>
+                        Full Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="signupName" 
+                        class="form-input" 
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="mail" class="label-icon"></i>
+                        Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="signupEmail" 
+                        class="form-input" 
+                        placeholder="Enter your email address"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="cake" class="label-icon"></i>
+                        Date of Birth
+                    </label>
+                    <input 
+                        type="date" 
+                        id="signupDOB" 
+                        class="form-input"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="lock" class="label-icon"></i>
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="signupPassword" 
+                        class="form-input" 
+                        placeholder="Create a strong password"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="help-circle" class="label-icon"></i>
+                        Security Question
+                    </label>
+                    <select id="securityQuestion" class="form-input" required>
+                        <option value="">Select a security question</option>
+                        <option value="pet">What is your pet's name?</option>
+                        <option value="city">What city were you born in?</option>
+                        <option value="school">What is your mother's maiden name?</option>
+                        <option value="teacher">What was your first teacher's name?</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="key" class="label-icon"></i>
+                        Security Answer
+                    </label>
+                    <input 
+                        type="text" 
+                        id="securityAnswer" 
+                        class="form-input" 
+                        placeholder="Enter your answer"
+                        required
+                    >
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="check" class="btn-icon"></i>
+                    Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i data-lucide="help-circle" class="title-icon"></i>
+                    Reset Password
+                </h2>
+                <button id="closeForgotModal" class="modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <form id="forgotPasswordForm" class="modal-form">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i data-lucide="mail" class="label-icon"></i>
+                        Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="forgotEmail" 
+                        class="form-input" 
+                        placeholder="Enter your email address"
+                        required
+                    >
+                </div>
+                
+                <div id="securityQuestionSection" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i data-lucide="help-circle" class="label-icon"></i>
+                            Security Question
+                        </label>
+                        <p id="displaySecurityQuestion" class="security-question-text"></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i data-lucide="key" class="label-icon"></i>
+                            Your Answer
+                        </label>
+                        <input 
+                            type="text" 
+                            id="forgotSecurityAnswer" 
+                            class="form-input" 
+                            placeholder="Enter your answer"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i data-lucide="lock" class="label-icon"></i>
+                            New Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="newPassword" 
+                            class="form-input" 
+                            placeholder="Enter new password"
+                        >
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i data-lucide="check" class="btn-icon"></i>
+                    <span id="forgotBtnText">Continue</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/pwa.js"></script>
+    <script src="assets/js/theme_toggle.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
+    <script>
+        // Check if user already logged in with valid session
+        if (AppData.user && isLoggedIn()) {
+            window.location.href = 'pages/dashboard.html';
+        }
+        
+        // Hide signup section if account exists
+        if (hasUserAccount()) {
+            document.getElementById('signupSection').style.display = 'none';
+        }
+        
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!validateEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            const result = loginUser(email, password);
+            
+            if (result.success) {
+                showToast(result.message, 'success');
+                setTimeout(() => {
+                    window.location.href = 'pages/dashboard.html';
+                }, 1000);
+            } else {
+                showToast(result.message, 'error');
+            }
+        });
+        
+        // Show Signup Modal
+        document.getElementById('showSignupBtn')?.addEventListener('click', () => {
+            document.getElementById('signupModal').classList.add('active');
+        });
+        
+        // Close Signup Modal
+        document.getElementById('closeSignupModal').addEventListener('click', () => {
+            document.getElementById('signupModal').classList.remove('active');
+        });
+        
+        // Signup Form Handler
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const dob = document.getElementById('signupDOB').value;
+            const password = document.getElementById('signupPassword').value;
+            const securityQuestion = document.getElementById('securityQuestion').value;
+            const securityAnswer = document.getElementById('securityAnswer').value;
+            
+            if (!validateRequired(name)) {
+                showToast('Please enter your name', 'error');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            if (!dob) {
+                showToast('Please enter your date of birth', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            if (!securityQuestion) {
+                showToast('Please select a security question', 'error');
+                return;
+            }
+            
+            if (!validateRequired(securityAnswer)) {
+                showToast('Please provide a security answer', 'error');
+                return;
+            }
+            
+            const result = createUserAccount({
+                name,
+                email,
+                dateOfBirth: dob,
+                password,
+                securityQuestion,
+                securityAnswer
+            });
+            
+            if (result.success) {
+                showToast(result.message, 'success');
+                document.getElementById('signupModal').classList.remove('active');
+                document.getElementById('signupSection').style.display = 'none';
+                document.getElementById('signupForm').reset();
+            } else {
+                showToast(result.message, 'error');
+            }
+        });
+        
+        // Show Forgot Password Modal
+        document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('forgotPasswordModal').classList.add('active');
+        });
+        
+        // Close Forgot Password Modal
+        document.getElementById('closeForgotModal').addEventListener('click', () => {
+            document.getElementById('forgotPasswordModal').classList.remove('active');
+            document.getElementById('securityQuestionSection').style.display = 'none';
+            document.getElementById('forgotPasswordForm').reset();
+        });
+        
+        // Forgot Password Form Handler
+        let forgotPasswordStep = 1;
+        document.getElementById('forgotPasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (forgotPasswordStep === 1) {
+                const email = document.getElementById('forgotEmail').value;
+                
+                if (!validateEmail(email)) {
+                    showToast('Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                if (!AppData.user || AppData.user.email !== email) {
+                    showToast('No account found with this email', 'error');
+                    return;
+                }
+                
+                // Show security question
+                const questionMap = {
+                    pet: "What is your pet's name?",
+                    city: "What city were you born in?",
+                    school: "What is your mother's maiden name?",
+                    teacher: "What was your first teacher's name?"
+                };
+                
+                document.getElementById('displaySecurityQuestion').textContent = 
+                    questionMap[AppData.user.securityQuestion];
+                document.getElementById('securityQuestionSection').style.display = 'block';
+                document.getElementById('forgotBtnText').textContent = 'Reset Password';
+                forgotPasswordStep = 2;
+                
+            } else {
+                const email = document.getElementById('forgotEmail').value;
+                const answer = document.getElementById('forgotSecurityAnswer').value;
+                const newPassword = document.getElementById('newPassword').value;
+                
+                if (!validateRequired(answer)) {
+                    showToast('Please provide your security answer', 'error');
+                    return;
+                }
+                
+                if (newPassword.length < 6) {
+                    showToast('Password must be at least 6 characters', 'error');
+                    return;
+                }
+                
+                const result = resetPassword(email, answer, newPassword);
+                
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    document.getElementById('forgotPasswordModal').classList.remove('active');
+                    document.getElementById('securityQuestionSection').style.display = 'none';
+                    document.getElementById('forgotPasswordForm').reset();
+                    forgotPasswordStep = 1;
+                    document.getElementById('forgotBtnText').textContent = 'Continue';
+                } else {
+                    showToast(result.message, 'error');
+                }
+            }
+        });
+        
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+        
+        // Toast function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconMap = {
+                success: 'check-circle',
+                error: 'x-circle',
+                warning: 'alert-triangle',
+                info: 'info'
+            };
+            
+            toast.innerHTML = `
+                <i data-lucide="${iconMap[type]}" class="toast-icon"></i>
+                <span class="toast-message">${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Validation functions
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function validateRequired(value) {
+            return value.trim() !== '';
+        }
+    </script>
