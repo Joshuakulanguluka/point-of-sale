@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - POS System</title>
+    <meta name="description" content="Complete Point of Sale System with offline support">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="../assets/icons/icon-192x192.png">
+    <script>
+        // Prevent theme flicker - run before page renders
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.294.0/font/lucide.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <div id="sidebarContainer"></div>
+        <div class="main-content">
+            <div id="topbarContainer"></div>
+            <div class="content-wrapper">
+                <!-- Account Center -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h2 class="content-card-title"><i data-lucide="user-circle"></i>Account Center</h2>
+                    </div>
+                    <div class="content-card-body">
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                            <button class="action-btn" onclick="window.location.href='profile.html'">
+                                <i data-lucide="user"></i>Edit Profile
+                            </button>
+                            <button class="action-btn secondary" onclick="showChangePasswordModal()">
+                                <i data-lucide="lock"></i>Change Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Settings -->
+                <div class="content-card" style="margin-top: var(--spacing-xl);">
+                    <div class="content-card-header">
+                        <h2 class="content-card-title"><i data-lucide="settings"></i>System Settings</h2>
+                    </div>
+                    <div class="content-card-body">
+                        <form id="settingsForm">
+                            <div class="form-group">
+                                <label class="form-label"><i data-lucide="store" class="label-icon"></i>Business Name</label>
+                                <input type="text" id="businessName" class="form-input" placeholder="Enter business name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i data-lucide="palette" class="label-icon"></i>Theme</label>
+                                <select id="themeSelect" class="form-input">
+                                    <option value="dark">Dark Mode</option>
+                                    <option value="light">Light Mode</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary"><i data-lucide="save" class="btn-icon"></i>Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Password & Security -->
+                <div class="content-card" style="margin-top: var(--spacing-xl);">
+                    <div class="content-card-header">
+                        <h2 class="content-card-title"><i data-lucide="shield"></i>Password & Security</h2>
+                    </div>
+                    <div class="content-card-body">
+                        <h3 style="font-size: var(--text-lg); margin-bottom: var(--spacing-md); color: var(--text-primary);">Active Sessions</h3>
+                        <div id="sessionsList" style="display: flex; flex-direction: column; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg);"></div>
+                        <button class="action-btn danger" onclick="logoutAllDevices()">
+                            <i data-lucide="log-out"></i>Logout All Devices
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="content-card" style="margin-top: var(--spacing-xl);">
+                    <div class="content-card-header">
+                        <h2 class="content-card-title"><i data-lucide="database"></i>Data Management</h2>
+                    </div>
+                    <div class="content-card-body">
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                            <button class="action-btn danger" onclick="confirmEraseData()">
+                                <i data-lucide="trash-2"></i>Erase All Data
+                            </button>
+                            <button class="action-btn danger" onclick="confirmDeleteAccount()">
+                                <i data-lucide="user-x"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About & Legal -->
+                <div class="content-card" style="margin-top: var(--spacing-xl);">
+                    <div class="content-card-header">
+                        <h2 class="content-card-title"><i data-lucide="info"></i>About & Legal</h2>
+                    </div>
+                    <div class="content-card-body">
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                            <button class="action-btn secondary" onclick="showAbout()">
+                                <i data-lucide="help-circle"></i>About
+                            </button>
+                            <button class="action-btn secondary" onclick="showPrivacyPolicy()">
+                                <i data-lucide="shield-check"></i>Privacy Policy
+                            </button>
+                            <button class="action-btn secondary" onclick="showTermsOfService()">
+                                <i data-lucide="file-text"></i>Terms of Service
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title"><i data-lucide="lock" class="title-icon"></i>Change Password</h2>
+                <button onclick="closeChangePasswordModal()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <form id="changePasswordForm" class="modal-form">
+                <div class="form-group">
+                    <label class="form-label"><i data-lucide="lock" class="label-icon"></i>Current Password</label>
+                    <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i data-lucide="lock" class="label-icon"></i>New Password</label>
+                    <input type="password" id="newPasswordInput" class="form-input" placeholder="Enter new password" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i data-lucide="lock" class="label-icon"></i>Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" class="form-input" placeholder="Confirm new password" required>
+                </div>
+                <button type="submit" class="btn-primary"><i data-lucide="check" class="btn-icon"></i>Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="infoModalTitle"><i data-lucide="info" class="title-icon"></i>Information</h2>
+                <button onclick="closeInfoModal()" class="modal-close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-form" id="infoModalContent" style="max-height: 60vh; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/sync.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/theme_toggle.js"></script>
+    <script>
+        if (!AppData.user || !isLoggedIn()) window.location.href = '../index.html';
+        
+        function loadSettings() {
+            document.getElementById('businessName').value = AppData.settings.businessName;
+            document.getElementById('themeSelect').value = AppData.settings.theme;
+            loadSessions();
+        }
+
+        function loadSessions() {
+            const sessionsList = document.getElementById('sessionsList');
+            if (!AppData.user.sessions || AppData.user.sessions.length === 0) {
+                sessionsList.innerHTML = '<p style="color: var(--text-secondary);">No active sessions</p>';
+                return;
+            }
+
+            sessionsList.innerHTML = AppData.user.sessions.map(session => `
+                <div style="padding: var(--spacing-md); background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-xs);">
+                                <i data-lucide="monitor" style="width: 16px; height: 16px; display: inline;"></i>
+                                ${session.location || 'Unknown Location'}
+                            </div>
+                            <div style="font-size: var(--text-sm); color: var(--text-secondary);">
+                                Last active: ${new Date(session.lastActivity).toLocaleString()}
+                            </div>
+                        </div>
+                        ${session.id === localStorage.getItem('currentSession') ? 
+                            '<span class="badge success">Current</span>' : 
+                            `<button class="table-btn delete" onclick="logoutSession('${session.id}')" title="Logout"><i data-lucide="x"></i></button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function logoutSession(sessionId) {
+            if (AppData.user.sessions) {
+                AppData.user.sessions = AppData.user.sessions.filter(s => s.id !== sessionId);
+                saveData();
+                loadSessions();
+                showToast('Session logged out', 'success');
+            }
+        }
+        
+        document.getElementById('settingsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            AppData.settings.businessName = document.getElementById('businessName').value;
+            const newTheme = document.getElementById('themeSelect').value;
+            if (newTheme !== AppData.settings.theme) {
+                AppData.settings.theme = newTheme;
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            }
+            saveData();
+            showToast('Settings saved successfully', 'success');
+        });
+
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('active');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPasswordInput').value;
+            const confirm = document.getElementById('confirmNewPassword').value;
+
+            if (current !== AppData.user.password) {
+                showToast('Current password is incorrect', 'error');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            AppData.user.password = newPass;
+            saveData();
+            closeChangePasswordModal();
+            showToast('Password changed successfully', 'success');
+        });
+        
+        function logoutAllDevices() {
+            if (!confirm('Logout from all devices? You will need to login again.')) return;
+            AppData.user.sessions = [];
+            localStorage.removeItem('currentSession');
+            saveData();
+            showToast('Logged out from all devices', 'success');
+            setTimeout(() => window.location.href = '../index.html', 1000);
+        }
+
+        function confirmEraseData() {
+            if (!confirm('Erase ALL data? This cannot be undone!')) return;
+            if (!confirm('Are you absolutely sure? All sales, inventory, and transactions will be deleted!')) return;
+            const result = eraseAllData();
+            showToast(result.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        }
+
+        function confirmDeleteAccount() {
+            if (!confirm('Delete your account? This will erase everything and cannot be undone!')) return;
+            if (!confirm('Are you absolutely sure? This action is permanent!')) return;
+            deleteAccount();
+            showToast('Account deleted', 'success');
+            setTimeout(() => window.location.href = '../index.html', 1000);
+        }
+
+        function showAbout() {
+            document.getElementById('infoModalTitle').innerHTML = '<i data-lucide="info" class="title-icon"></i>About';
+            document.getElementById('infoModalContent').innerHTML = `
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--spacing-md); color: var(--text-primary);">Personal POS System</h3>
+                <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">Version 1.0.0</p>
+                <p style="color: var(--text-secondary); line-height: 1.6;">
+                    A personal point-of-sale system designed for individual business owners to manage inventory, sales, expenses, and financial transactions. 
+                    All data is stored locally on your device for complete privacy and control.
+                </p>
+                <p style="color: var(--text-secondary); margin-top: var(--spacing-md); line-height: 1.6;">
+                    <strong>Features:</strong><br>
+                    • Inventory Management<br>
+                    • Sales Tracking<br>
+                    • Expense Recording<br>
+                    • Financial Reports<br>
+                    • Transaction History<br>
+                    • Wallet Management
+                </p>
+            `;
+            document.getElementById('infoModal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function showPrivacyPolicy() {
+            document.getElementById('infoModalTitle').innerHTML = '<i data-lucide="shield-check" class="title-icon"></i>Privacy Policy';
+            document.getElementById('infoModalContent').innerHTML = `
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--spacing-md); color: var(--text-primary);">Privacy Policy</h3>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>Data Storage:</strong><br>
+                    All your data is stored locally on your device using browser localStorage. No data is transmitted to external servers.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>Data Collection:</strong><br>
+                    We do not collect, transmit, or share any of your personal or business data. Everything stays on your device.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>Data Security:</strong><br>
+                    Your data security depends on your device security. We recommend using strong passwords and keeping your device secure.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6;">
+                    <strong>Data Deletion:</strong><br>
+                    You can delete all your data at any time from the Settings page. This action is permanent and cannot be undone.
+                </p>
+            `;
+            document.getElementById('infoModal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function showTermsOfService() {
+            document.getElementById('infoModalTitle').innerHTML = '<i data-lucide="file-text" class="title-icon"></i>Terms of Service';
+            document.getElementById('infoModalContent').innerHTML = `
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--spacing-md); color: var(--text-primary);">Terms of Service</h3>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>Personal Use:</strong><br>
+                    This POS system is designed for personal and individual business use only.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>No Warranty:</strong><br>
+                    This software is provided "as is" without warranty of any kind. Use at your own risk.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>Data Backup:</strong><br>
+                    You are responsible for backing up your data. We recommend regular backups of your browser data.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--spacing-md);">
+                    <strong>Accuracy:</strong><br>
+                    While we strive for accuracy in calculations, you are responsible for verifying all financial data and reports.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6;">
+                    <strong>Modifications:</strong><br>
+                    These terms may be updated at any time. Continued use constitutes acceptance of any changes.
+                </p>
+            `;
+            document.getElementById('infoModal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function closeInfoModal() {
+            document.getElementById('infoModal').classList.remove('active');
+        }
+        
+        loadSettings();
+        lucide.createIcons();
+    </script>
+</body>
+</html>

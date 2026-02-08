@@ -1,0 +1,55 @@
+dont plan anything just develop the system below is the file structure. login page must be a card centeed on the screen
+create a pos system for a single user pos system that accepts only one account, currency must be kwacha. login page sign up option should disappear if one account is created email and password are for authentication only do not create any database and all data must be loaded accurately from one js file(data,js). light mode and dark mode feature. profile picture uploading allowed. must have a collapsible side bar. 
+clean and reposnive frontend good looking like the (https://www.flaticon.com/) website
+create reusable css variables and clases for easier global styling strictly do not use internal css or standalone
+lively ctive pos system
+strictly use fully colored lucid icons on states cards and include a low stock alert system
+all states cards must be showing  2*2 side by side in smal mobile screens
+strictly do not use gradient colors
+
+*light mode and dark mode feature
+
+1. dashboard ----(4 states cards, one bar chat, 3 action buttons)
+inventory (columns should be product name, quantity, buying price, selling price, net profit, actions *only this page should display content in table format the add stock alert must include a low stock reminder)
+
+2. inventory --- (4 states cards, )
+
+3. sales ----(page specifically for recording a sale just a cart with a floating plus icon to add product and we only search products which are available if are all products are sold they should be deleted from inventory, sole this page should only have 4 states cards(daily after 24hours should be resetting to 0), nothing else must be here so when selling a product the selling price by default must be the one in the invetory but make it editable, auto calculatin for items on the cart )
+
+4. expenses -----(4 states cards, expense history and add expense important fields should expense item and expense amount. not table format aswell)
+
+5. Wallet page (1 card for the balance specifically for the available money and can top up or withdraw any action that conserns money affects the money) 
+
+6. reports (should only be able to generate expense report and sales summary report but in table format and no downloading as csv only as pdf and pdf must be styled pdf with logo on it and name of the business)
+
+7. Transaction history page ---- (not in table format, when a sale history is deleted stock returns, and money values change back)
+8. notifications page (top bar)
+
+9. profile page(top bar)
+
+10. settings page
+
+#RULES
+all things like states cards, etc must use reusable variables in stylings, infact everything must use reusable variables, clases etc
+-all cards headings, titles, filters input field, buttons, etc must have icons.
+-validate al inputs
+-no adding notes anything no need to add input filed
+-auto calculation
+-do not integrete database for now but will use supabase later we are developing locally
+-color indicators for moneys
+thisis a single user pos system not a multi user pos system
+-strictly do not use emojis only lucid icons,
+-include toast messages for actions
+-in settings help with that system that can logout of other devices you know what i mean
+-forgot password resetting must be using a security question
+include placeholder texts on everything
+-use a very good looking font
+-professional ui design no basic design use  make a good looking ui that looks like (https://www.flaticon.com/) 
+-states cards must not be colorful only icons fully colored
+-use good looking font
+-include animations in the system it must feel alive and active
+
+strictly avoid basic and boring interface or front end style it good looking you now how good looking the (https://www.flaticon.com/) website is
+all input files must have place holder texts
+
+#USE TAILWIND ADVANCED CSS

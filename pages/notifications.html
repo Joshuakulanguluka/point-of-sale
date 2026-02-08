@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - POS System</title>
+    <meta name="description" content="Complete Point of Sale System with offline support">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="../assets/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="../assets/icons/icon-192x192.png">
+    <script>
+        // Prevent theme flicker - run before page renders
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.294.0/font/lucide.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <div id="sidebarContainer"></div>
+        <div class="main-content">
+            <div id="topbarContainer"></div>
+            <div class="content-wrapper">
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h2 class="content-card-title"><i data-lucide="bell"></i>Notifications</h2>
+                    </div>
+                    <div class="content-card-body">
+                        <div id="notificationsList" class="notifications-list"></div>
+                        <div id="emptyNotifications" class="empty-state" style="display: none;">
+                            <i data-lucide="bell-off" class="empty-state-icon"></i>
+                            <h3 class="empty-state-title">No Notifications</h3>
+                            <p class="empty-state-message">You're all caught up!</p>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div id="paginationContainer" style="display: none; margin-top: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                            <div style="color: var(--text-secondary); font-size: var(--text-sm);">
+                                Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="totalItems">0</span> notifications
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-xs); flex-wrap: wrap;">
+                                <button id="prevPage" class="action-btn secondary" style="padding: 0.5rem 1rem;" onclick="changePage(-1)">
+                                    <i data-lucide="chevron-left"></i>
+                                    Previous
+                                </button>
+                                <div id="pageNumbers" style="display: flex; gap: var(--spacing-xs); flex-wrap: wrap;"></div>
+                                <button id="nextPage" class="action-btn secondary" style="padding: 0.5rem 1rem;" onclick="changePage(1)">
+                                    Next
+                                    <i data-lucide="chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="toastContainer" class="toast-container"></div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/data.js"></script>
+    <script src="../assets/js/sync.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/theme_toggle.js"></script>
+    <script>
+        if (!AppData.user || !isLoggedIn()) window.location.href = '../index.html';
+        
+        let currentPage = 1;
+        const itemsPerPage = 15;
+        let allNotifications = [];
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            
+            return date.toLocaleDateString();
+        }
+        
+        function loadNotifications() {
+            // Sort notifications (newest first)
+            allNotifications = [...AppData.notifications].sort((a, b) => new Date(b.date) - new Date(a.date));
+            currentPage = 1;
+            displayNotifications();
+        }
+        
+        function displayNotifications() {
+            const list = document.getElementById('notificationsList');
+            const empty = document.getElementById('emptyNotifications');
+            const paginationContainer = document.getElementById('paginationContainer');
+            
+            if (allNotifications.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'flex';
+                paginationContainer.style.display = 'none';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(allNotifications.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, allNotifications.length);
+            const paginatedNotifications = allNotifications.slice(startIndex, endIndex);
+            
+            // Display notifications
+            const iconMap = { info: 'info', success: 'check-circle', warning: 'alert-triangle', error: 'alert-circle' };
+            list.innerHTML = paginatedNotifications.map(n => `
+                <div class="notification-item ${n.type}">
+                    <div class="notification-item-header">
+                        <i data-lucide="${iconMap[n.type]}" class="notification-item-icon"></i>
+                        <span class="notification-item-title">${n.title}</span>
+                    </div>
+                    <p class="notification-item-message">${n.message}</p>
+                    <span class="notification-item-date">${formatDate(n.date)}</span>
+                </div>
+            `).join('');
+            
+            // Update pagination info
+            document.getElementById('showingStart').textContent = startIndex + 1;
+            document.getElementById('showingEnd').textContent = endIndex;
+            document.getElementById('totalItems').textContent = allNotifications.length;
+            
+            // Show/hide pagination
+            if (allNotifications.length > itemsPerPage) {
+                paginationContainer.style.display = 'flex';
+                updatePaginationButtons(totalPages);
+            } else {
+                paginationContainer.style.display = 'none';
+            }
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+        
+        function updatePaginationButtons(totalPages) {
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const pageNumbers = document.getElementById('pageNumbers');
+            
+            // Disable/enable prev/next buttons
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+            prevBtn.style.opacity = currentPage === 1 ? '0.5' : '1';
+            prevBtn.style.cursor = currentPage === 1 ? 'not-allowed' : 'pointer';
+            nextBtn.style.opacity = currentPage === totalPages ? '0.5' : '1';
+            nextBtn.style.cursor = currentPage === totalPages ? 'not-allowed' : 'pointer';
+            
+            // Generate page numbers
+            pageNumbers.innerHTML = '';
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'action-btn secondary';
+                pageBtn.style.padding = '0.5rem 1rem';
+                pageBtn.style.minWidth = '40px';
+                pageBtn.textContent = i;
+                
+                if (i === currentPage) {
+                    pageBtn.style.background = 'var(--color-primary)';
+                    pageBtn.style.color = '#0a0e1a';
+                    pageBtn.style.fontWeight = '700';
+                }
+                
+                pageBtn.onclick = () => goToPage(i);
+                pageNumbers.appendChild(pageBtn);
+            }
+        }
+        
+        function changePage(direction) {
+            const totalPages = Math.ceil(allNotifications.length / itemsPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayNotifications();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            displayNotifications();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        loadNotifications();
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
